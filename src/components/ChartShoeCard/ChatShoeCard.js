@@ -1,6 +1,13 @@
 import { useState } from 'react'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
-import { Grid, Stack, TextField, Typography, useTheme } from '@mui/material'
+import {
+  Button,
+  Grid,
+  Stack,
+  TextField,
+  Typography,
+  useTheme
+} from '@mui/material'
 import { Box } from '@mui/system'
 import Image from 'next/image'
 
@@ -18,9 +25,9 @@ const ChartShoeCard = ({
   const theme = useTheme()
 
   const [quantity, setQuantity] = useState(initialQuantity)
-
+  const [disabled, setDisabled] = useState(false)
   const handleChange = (event) => {
-    const value = event.target.value
+    let value = event.target.value
     const valueLength = value.length
 
     if (valueLength && value.match(/[0-9]/g).length === valueLength) {
@@ -29,11 +36,24 @@ const ChartShoeCard = ({
       setQuantity(aux)
       changeQuantity(id, aux)
     }
-    if ((value === '' || value === '0') && valueLength <= 1) {
-      // 1 is minimun quantity to buy, if user wants to delete the shoe, they should use the delete button
-      setQuantity(1)
-      changeQuantity(1)
+
+    if (valueLength === 0) {
+      setQuantity(valueLength)
+      value = quantity
+      changeQuantity(id, valueLength)
     }
+  }
+
+  const handleSum = () => {
+    quantity < 0 ? setDisabled(true) : setDisabled(false)
+    setQuantity(quantity + 1)
+    changeQuantity(id, quantity + 1)
+  }
+
+  const handleSubstraction = () => {
+    quantity === 1 ? setDisabled(true) : setDisabled(false)
+    setQuantity(quantity - 1)
+    changeQuantity(id, quantity - 1)
   }
 
   return (
@@ -68,10 +88,7 @@ const ChartShoeCard = ({
         sx={{ display: 'flex', flexDirection: 'column' }}
       >
         <Typography variant="h3">{name}</Typography>
-        <Typography variant="subtitle1">
-          {/* {gender} {"'"}s Shoes */}
-          {description}
-        </Typography>
+        <Typography variant="subtitle1">{description}</Typography>
 
         <Box sx={{ marginTop: '.1rem' }} />
         <Typography
@@ -81,14 +98,40 @@ const ChartShoeCard = ({
           In stock
         </Typography>
 
-        <Box sx={{ marginTop: 'auto', minWidth: 120 }}>
+        <Box
+          sx={{
+            marginTop: 'auto',
+            minWidth: 120,
+            display: 'flex',
+            alignItems: 'flex-end'
+          }}
+        >
+          <Button
+            variant="outlined"
+            onClick={handleSubstraction}
+            disabled={disabled}
+            sx={{ mx: 1, height: '80%', width: '30%', maxWidth: '50px' }}
+          >
+            -
+          </Button>
           <TextField
-            inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+            inputProps={{ inputMode: 'text', pattern: '[0-9]*' }}
             value={quantity}
             onChange={handleChange}
             label="Quantity"
             variant="standard"
+            sx={{
+              width: '100%',
+              maxWidth: '100px'
+            }}
           />
+          <Button
+            sx={{ mx: 1, height: '80%', width: '30%', maxWidth: '50px' }}
+            variant="outlined"
+            onClick={handleSum}
+          >
+            +
+          </Button>
         </Box>
       </Grid>
 

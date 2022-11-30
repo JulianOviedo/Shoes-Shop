@@ -14,6 +14,8 @@ import Link from 'next/link'
 import { getToken } from 'next-auth/jwt'
 import { signOut } from 'next-auth/react'
 
+const baseURL = 'https://shoes-shop-strapi.herokuapp.com'
+
 export async function getServerSideProps(context) {
   const qs = require('qs')
 
@@ -143,41 +145,25 @@ export default function Home({ products }) {
                 display: 'flex',
                 flexWrap: 'wrap',
                 flex: '50%',
-                gap: '4rem',
+                gap: '2rem',
                 [theme.breakpoints.down('sm')]: {
                   overflow: 'auto',
-                  maxHeight: 400
+                  maxHeight: 400,
+                  justifyContent: 'center'
                 }
               }}
             >
-              <ProductCard
-                image={'/airmax-270.png'}
-                productTitle="Nike AirMax 90"
-                productPrice="140"
-                productDescription="Men's Shoes"
-                id={1}
-              />
-              <ProductCard
-                image={'/shoes.png'}
-                productTitle="Nike AirMax 270"
-                productPrice="160"
-                productDescription="Women's Shoes"
-                id={2}
-              />
-              <ProductCard
-                image={'/air-force.png'}
-                productTitle="Nike Air Force 1 '07 SE"
-                productPrice="110"
-                productDescription="Women's Shoes"
-                id={3}
-              />
-
+              {products.length === 0 && (
+                <Typography variant="main">No shoes available yet</Typography>
+              )}
               {products.map(({ id, attributes }) => (
                 <ProductCard
                   key={id}
                   productTitle={attributes.name}
                   productDescription={attributes.description}
-                  image={attributes.images[0] || '/shoes.png'}
+                  image={`${
+                    baseURL + attributes.images.data[0].attributes.url
+                  }`}
                   productPrice={attributes.price}
                   id={id}
                 />
