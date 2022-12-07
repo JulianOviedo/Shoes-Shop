@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import HeaderLoggedIn from '@components/HeaderLoggedIn/HeaderLoggedIn'
+import Loading from '@components/Loading/Loading'
 import BarItem from '@components/NavBarItem/NavBarItem'
 import PrimaryButton from '@components/PrimaryButton/PrimaryButton'
 import ProductCard from '@components/ProductCard/ProductCard'
@@ -11,6 +13,7 @@ import { getProducts } from 'helpers/products/getProducts'
 import { getUserInfo } from 'helpers/user-auth/getUserInfo'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { getToken } from 'next-auth/jwt'
 import { signOut } from 'next-auth/react'
 
@@ -22,6 +25,7 @@ export async function getServerSideProps(context) {
   const token = await getToken(context)
 
   const userRes = await getUserInfo(token.accessToken)
+  const userData = userRes.data
   const userId = userRes.data.id
 
   const query = qs.stringify(
@@ -49,17 +53,28 @@ export async function getServerSideProps(context) {
 
   return {
     props: {
-      products
+      products,
+      userData
     }
   }
 }
 
-export default function Home({ products }) {
+export default function Home({ products, userData }) {
   const theme = useTheme()
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleLogOut = () => {
     signOut()
     localStorage.removeItem('shoes')
+  }
+
+  const refreshData = async () => {
+    setIsLoading(true)
+    router.replace(router.asPath)
+    setTimeout(() => {
+      setIsLoading(false)
+    }, 2000)
   }
 
   return (
@@ -88,7 +103,7 @@ export default function Home({ products }) {
             }
           }}
         >
-          <ProfileInfoSideBar />
+          <ProfileInfoSideBar userData={userData} />
           <Link href="/update-profile">
             <Box
               sx={{
@@ -112,7 +127,10 @@ export default function Home({ products }) {
             </BarItem>
           </Box>
         </Box>
-        <Box component="main" sx={{ m: { xs: 0, sm: '20px' }, width: '100%' }}>
+        <Box
+          component="main"
+          sx={{ m: { xs: 0, sm: '20px' }, width: '100%', pb: 8 }}
+        >
           <Box
             sx={{
               width: '100%',
@@ -124,7 +142,7 @@ export default function Home({ products }) {
             <Image src="/bgHomeImg.png" alt="panelImage" layout="fill"></Image>
           </Box>
           <Box sx={{ width: '100%', p: '20px' }}>
-            <SubHeader />
+            <SubHeader userData={userData} />
             <Box
               sx={{
                 display: 'flex',
@@ -153,24 +171,35 @@ export default function Home({ products }) {
                 }
               }}
             >
-              {products.length === 0 && (
+              {products.length === 0 && !isLoading && (
                 <Typography variant="main">No shoes available yet</Typography>
               )}
-              {products.map(({ id, attributes }) => (
-                <ProductCard
-                  key={id}
-                  productTitle={attributes.name}
-                  productDescription={attributes.description}
-                  image={`${
-                    baseURL + attributes.images.data[0].attributes.url
-                  }`}
-                  productPrice={attributes.price}
-                  id={id}
-                />
-              ))}
+
+              {isLoading && <Loading />}
+              {!isLoading &&
+                products.map(({ id, attributes }) => (
+                  <ProductCard
+                    key={id}
+                    productTitle={attributes.name}
+                    productDescription={attributes.description}
+                    image={`${
+                      baseURL + attributes.images.data[0].attributes.url
+                    }`}
+                    productPrice={attributes.price}
+                    id={id}
+                    isFromUser={true}
+                    refreshData={refreshData}
+                  />
+                ))}
             </Box>
-            <Box sx={{ display: { xs: 'block', md: 'none' }, mt: '1rem' }}>
-              <PrimaryButton maxWidth="100%">
+            <Box
+              sx={{
+                display: { xs: 'flex', md: 'none' },
+                justifyContent: 'center',
+                mt: '5rem'
+              }}
+            >
+              <PrimaryButton maxWidth="152px">
                 <Link href="/add-product">Add Products</Link>
               </PrimaryButton>
             </Box>

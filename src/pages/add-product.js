@@ -1,14 +1,12 @@
+import { useContext } from 'react'
 import AddProductForm from '@components/AddProductForm/AddProductForm'
 import HeaderLoggedIn from '@components/HeaderLoggedIn/HeaderLoggedIn'
 import BarItem from '@components/NavBarItem/NavBarItem'
 import PrimaryButton from '@components/PrimaryButton/PrimaryButton'
-import SecondaryButton from '@components/SecondaryButton/SecondaryButton'
 import ProfileInfoSideBar from '@components/SideBarProfileInfo/SideBarProfileInfo'
-import ChatIcon from '@mui/icons-material/Chat'
-import ListAltIcon from '@mui/icons-material/ListAlt'
 import LogoutIcon from '@mui/icons-material/Logout'
-import ShoppingBagIcon from '@mui/icons-material/ShoppingBag'
 import { Box, Button, Typography, useTheme } from '@mui/material'
+import { UserContext } from 'context/UserContext'
 import { getBrands } from 'helpers/products/getBrands'
 import { getCategories } from 'helpers/products/getCategories'
 import { getColors } from 'helpers/products/getColors'
@@ -47,9 +45,8 @@ export default function AddProduct({
     inputInfo,
     setInputInfo,
     handleInputChange,
-    handleSubmit,
     handleInputImg,
-    handlePremadeImg
+    handleSubmit
   } = useAddProductForm()
 
   console.log(inputInfo)
@@ -60,6 +57,10 @@ export default function AddProduct({
     localStorage.removeItem('shoes')
     signOut()
   }
+
+  const context = useContext(UserContext)
+
+  console.log(context.user)
 
   return (
     <>
@@ -75,19 +76,7 @@ export default function AddProduct({
         <Box
           sx={{ display: { xs: 'none', sm: 'block' }, flexDirection: 'column' }}
         >
-          <ProfileInfoSideBar />
-          <Box sx={{ display: 'flex', mt: '30px', ml: '46px' }}>
-            <ShoppingBagIcon sx={{ color: '#6E7278' }} />
-            <BarItem name="My Orders" />
-          </Box>
-          <Box sx={{ display: 'flex', mt: '30px', ml: '46px' }}>
-            <ListAltIcon sx={{ color: '#6E7278' }} />
-            <BarItem name="Wish List" num={4} />
-          </Box>
-          <Box sx={{ display: 'flex', mt: '30px', ml: '46px' }}>
-            <ChatIcon sx={{ color: '#6E7278' }} />
-            <BarItem name="Newsletters" />
-          </Box>
+          <ProfileInfoSideBar userData={context?.user.userInfo} />
           <Box
             sx={{ display: 'flex', mt: '30px', ml: '46px', cursor: 'pointer' }}
           >
@@ -112,65 +101,64 @@ export default function AddProduct({
             display: 'flex',
             flex: '1',
             flexDirection: 'column',
-            p: { xs: '20px', sm: '55px' }
+            p: { xs: '20px', sm: '55px' },
+            width: '100%'
           }}
         >
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'row',
-              flex: '1',
-              mb: '15px'
-            }}
-          >
-            <Box sx={{ flex: '1', maxWidth: 890 }}>
-              <Typography
-                variant="h1"
-                sx={{ [theme.breakpoints.down('md')]: { fontSize: '30px' } }}
-              >
-                Add Product
-              </Typography>
-            </Box>
+          <form onSubmit={handleSubmit}>
             <Box
               sx={{
-                display: { xs: 'none', lg: 'flex' },
-                height: 40,
-                width: 323,
-                gap: '19px',
+                display: 'flex',
+                flexDirection: 'row',
                 flex: '1',
-                justifyContent: 'flex-end'
+                mb: '15px',
+                alignItems: 'center'
               }}
             >
-              <PrimaryButton maxWidth="152px">Schedule</PrimaryButton>
-              <SecondaryButton
-                onClick={handleSubmit}
-                form="addProduct"
-                maxWidth="152px"
+              <Box sx={{ flex: '1', maxWidth: 890 }}>
+                <Typography
+                  variant="h1"
+                  sx={{ [theme.breakpoints.down('md')]: { fontSize: '30px' } }}
+                >
+                  Add Product
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  display: { xs: 'none', lg: 'flex' },
+                  height: 40,
+                  width: 323,
+                  gap: '19px',
+                  flex: '1',
+                  justifyContent: 'flex-end'
+                }}
               >
-                Save
-              </SecondaryButton>
+                <PrimaryButton maxWidth="152px">Save</PrimaryButton>
+              </Box>
             </Box>
-          </Box>
-          <Typography variant="p" sx={{ maxWidth: '900px' }}>
-            Lorem ipsum, or lipsum as it is sometimes known, is dummy text used
-            in laying out print, graphic or web designs. The passage is
-            attributed to an unknown typesetter in the 15th century who is
-            thought to have scrambled parts of Ciceros De Finibus Bonorum et
-            Malorum for use in a type specimen book. It usually begins with:
-          </Typography>
+            <Box sx={{ maxWidth: '900px' }}>
+              <Typography variant="p">
+                Lorem ipsum, or lipsum as it is sometimes known, is dummy text
+                used in laying out print, graphic or web designs. The passage is
+                attributed to an unknown typesetter in the 15th century who is
+                thought to have scrambled parts of Ciceros De Finibus Bonorum et
+                Malorum for use in a type specimen book. It usually begins with:
+              </Typography>
+            </Box>
 
-          <AddProductForm
-            id="addProduct"
-            brands={brands}
-            genders={genders}
-            sizes={sizes}
-            categories={categories}
-            colors={colors}
-            setInputInfo={setInputInfo}
-            handleInputChange={handleInputChange}
-            handleInputImg={handleInputImg}
-            handlePremadeImg={handlePremadeImg}
-          />
+            <AddProductForm
+              id="addProduct"
+              brands={brands}
+              genders={genders}
+              sizes={sizes}
+              categories={categories}
+              colors={colors}
+              setInputInfo={setInputInfo}
+              handleInputChange={handleInputChange}
+              handleInputImg={handleInputImg}
+              inputInfo={inputInfo}
+            />
+          </form>
         </Box>
       </Box>
     </>
